@@ -1,0 +1,33 @@
+select b.starttime, f.name from
+cd.bookings b, cd.facilities f where(
+  b.starttime >= '2012-09-21' and b.starttime < '2012-09-22' and f.name like '%Tennis Court%'
+  ) order by b.starttime
+
+
+select (a.firstname || ' ' || a.surname) as member, c.name as facility, 
+(case when a.memid = 0 then b.slots * c.guestcost
+     else b.slots * c.membercost
+end) as cost from
+cd.members a inner join cd.bookings b on (a.memid = b.memid)
+inner join cd.facilities c on (b.facid = c.facid)
+where ((a.memid = 0 and b.slots * c.guestcost > 30) or (a.memid > 0 and b.slots * c.membercost > 30))
+and b.starttime >= '2012-09-14' and b.starttime < '2012-09-15'
+order by member
+
+select facid, EXTRACT(MONTH FROM starttime), sum(slots) as "Total Slots"
+from cd.bookings group by facid, month(starttime) order by facid, month(starttime)
+
+88007750000
+
+select d.GENERATE_SERIES as date, b.joindate
+from (
+  select GENERATE_SERIES 
+  from GENERATE_SERIES('2012-08-01'::date,'2012-08-31','1 day')) d
+inner join cd.members b on extract(month from d.GENERATE_SERIES) = extract(month from b.joindate)
+
+select d.GENERATE_SERIES as date, (
+  select count(*) from cd.members b
+  where extract(month from d.GENERATE_SERIES) = extract(month from b.joindate))
+from (
+  select GENERATE_SERIES 
+  from GENERATE_SERIES('2012-08-01'::date,'2012-08-31','1 day')) d
