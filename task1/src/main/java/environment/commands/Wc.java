@@ -1,10 +1,13 @@
 package environment.commands;
 
+import environment.Environment;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,13 +73,19 @@ public class Wc extends CommandInterface {
         int wordsCount = 0;
         int linesCount = 0;
         int bytesCount = 0;
+        Path currentDirectory = Paths.get(Environment.getCurrentDirectory());
         for (int i = 0; i < args.size(); i++) {
             wordsCount = 0;
             linesCount = 0;
             bytesCount = 0;
             List<String> lines = null;
             try {
-                lines = Files.readAllLines(Paths.get(args.get(i)), StandardCharsets.UTF_8);
+                Path currentFilePath = Paths.get(args.get(i));
+                if (currentFilePath.isAbsolute()) {
+                    lines = Files.readAllLines(currentFilePath, StandardCharsets.UTF_8);
+                } else {
+                    lines = Files.readAllLines(currentDirectory.resolve(currentFilePath), StandardCharsets.UTF_8);
+                }
                 for (String line : lines) {
                     if(!line.isEmpty()) {
                         wordsCount += line.split(" ").length;

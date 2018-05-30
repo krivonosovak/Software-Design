@@ -1,5 +1,7 @@
 package environment.commands;
 
+import environment.Environment;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -14,7 +16,8 @@ public class Pwd extends CommandInterface{
     @Override
     public void eval(PipedOutputStream output, PipedInputStream input, PipedOutputStream errOutput) {
         try {
-            output.write((System.getProperty("user.dir") + "\n").getBytes());
+            String currentDirectory = Environment.getCurrentDirectory();
+            output.write((currentDirectory + "\n").getBytes());
             output.flush();
         } catch (IOException e) {
         }

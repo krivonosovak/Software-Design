@@ -10,6 +10,7 @@ public class Environment {
      * Таблица, хранящие в качестве ключа - имя переменной окружения, а в качестве значения - значение переменной
      */
     private static final HashMap<String, String> table = new HashMap<>();
+    private static String currentDirectory = System.getProperty("user.dir");
 
     private Environment() {};
 
@@ -33,5 +34,13 @@ public class Environment {
             return table.get(key);
         }
         return "";
+    }
+
+    public static String getCurrentDirectory() {
+        return currentDirectory;
+    }
+
+    public static void setCurrentDirectory(String newDirectory) {
+        currentDirectory = newDirectory;
     }
 }

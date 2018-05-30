@@ -56,8 +56,6 @@ public class ComandManager {
         }
 
         // Отдельный поток для вывода в консоль результатов цепочек вычислений и ошибок
-
-
         final PipedInputStream finalOldInput = oldInput;
 
         printThread = new Thread(new Runnable() {
@@ -141,6 +139,20 @@ public class ComandManager {
             case "__equal__":
                 boolean flag2 = ((chain.size() - comInd) == 3);
                 cmd = new Equal(chain.get(comInd + 1),chain.get(comInd + 2),flag2);
+                break;
+            case "cd":
+                if (args.size() == 1) {
+                    cmd = new Cd(args);
+                } else {
+                    cmd = new Cd();
+                }
+                break;
+            case "ls":
+                if (args.size() == 1) {
+                    cmd = new Ls(args);
+                } else {
+                    cmd = new Ls();
+                }
                 break;
             case "":
                 cmd = new Empty();

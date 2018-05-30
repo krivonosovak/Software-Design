@@ -1,11 +1,13 @@
 package environment.commands;
 
+import environment.Environment;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -152,13 +154,19 @@ public class Grep extends CommandInterface{
         Pattern r = Pattern.compile(pattern);
         Matcher m = null;
         String prefix = "";
+        Path currentDirectory = Paths.get(Environment.getCurrentDirectory());
         for (int i = 1; i < grepArgs.length; i++) {
             if (grepArgs.length > 2) {
                 prefix = grepArgs[i] + ":";
             }
             List<String> lines = null;
             try {
-                lines = Files.readAllLines(Paths.get(grepArgs[i]), StandardCharsets.UTF_8);
+                Path currentFilePath = Paths.get(args.get(i));
+                if (currentFilePath.isAbsolute()) {
+                    lines = Files.readAllLines(currentFilePath, StandardCharsets.UTF_8);
+                } else {
+                    lines = Files.readAllLines(currentDirectory.resolve(currentFilePath), StandardCharsets.UTF_8);
+                }
                 fillStream(lines,prefix,output,m,r);
             } catch (IOException e) {
                 errBuilder.append("grep: " + e.getMessage() + ": No such file or directory\n");
