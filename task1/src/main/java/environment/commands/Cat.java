@@ -68,6 +68,4 @@ public class Cat extends CommandInterface{
             }
         }
     }
-
-
 }

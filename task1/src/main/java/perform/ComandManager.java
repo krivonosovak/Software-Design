@@ -79,6 +79,7 @@ public class ComandManager {
             while (data != -1) {
                 System.out.print((char) data);
                 data = input.read();
+                System.out.flush();
             }
         } catch (IOException e) {
         }
@@ -141,14 +142,14 @@ public class ComandManager {
                 cmd = new Equal(chain.get(comInd + 1),chain.get(comInd + 2),flag2);
                 break;
             case "cd":
-                if (args.size() == 1) {
+                if (args.size() > 0) {
                     cmd = new Cd(args);
                 } else {
                     cmd = new Cd();
                 }
                 break;
             case "ls":
-                if (args.size() == 1) {
+                if (args.size() > 0) {
                     cmd = new Ls(args);
                 } else {
                     cmd = new Ls();

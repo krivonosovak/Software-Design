@@ -35,11 +35,16 @@ public class Environment {
         }
         return "";
     }
-
+    /**
+     * Возвращает текущую рабочую директорию
+     */
     public static String getCurrentDirectory() {
         return currentDirectory;
     }
 
+    /**
+     * Изменяет текущую рабочую директорию
+     */
     public static void setCurrentDirectory(String newDirectory) {
         currentDirectory = newDirectory;
     }

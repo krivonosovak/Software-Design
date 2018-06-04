@@ -27,33 +27,30 @@ public class Cd extends CommandInterface {
 
     @Override
     public void eval(PipedOutputStream output, PipedInputStream input, PipedOutputStream errOutput) {
-        if (args == null) {
-            Environment.setCurrentDirectory(System.getProperty("user.home"));
-        } else {
-
-            Path currentDirectory = Paths.get(Environment.getCurrentDirectory());
-            Path currentFilePath = Paths.get(args.get(0));
-            Path newCurDirectory;
-
-            if (currentFilePath.isAbsolute()) {
-                newCurDirectory = currentFilePath;
-
-            } else {
-                newCurDirectory = currentDirectory.resolve(currentFilePath).normalize();
-            }
-            try {
+        try {
+            output.close();
+            if (args == null) {
+                Environment.setCurrentDirectory(System.getProperty("user.home"));
+            } else if (args.size() == 1) {
+                Path currentDirectory = Paths.get(Environment.getCurrentDirectory());
+                Path currentFilePath = Paths.get(args.get(0));
+                Path newCurDirectory = null;
+                if (currentFilePath.isAbsolute()) {
+                    newCurDirectory = currentFilePath;
+                } else {
+                    newCurDirectory = currentDirectory.resolve(currentFilePath).normalize();
+                }
                 if (Files.exists(newCurDirectory) && Files.isDirectory(newCurDirectory)) {
                     Environment.setCurrentDirectory(newCurDirectory.toString());
                 } else {
-                    throw new IOException(currentDirectory.toString());
-                }
-            } catch (IOException e) {
-                try {
-                    errOutput.write(("cd: " + e.getMessage() + ": No such file or directory\n").getBytes());
+                    errOutput.write(("cd: " + newCurDirectory.toString() +": No such directory\n").getBytes());
                     errOutput.flush();
-                } catch (IOException e1) {
                 }
+            } else {
+                errOutput.write(("cd: too many arguments\n").getBytes());
+                errOutput.flush();
             }
+        } catch (IOException e) {
         }
     }
 }

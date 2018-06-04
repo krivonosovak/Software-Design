@@ -1,51 +1,76 @@
 package Commands;
 
+import environment.Environment;
 import exceptions.BadQuotesException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LsTest extends TestCommand {
 
-    @DisplayName("test ls")
+    private File createDirectoryWithFiles(ArrayList<String> filenames) throws IOException {
+        File file = File.createTempFile("o93tuhigp", "");
+        file.delete();
+        file.mkdir();
+
+        for (String subpath : filenames) {
+            Path p = Paths.get(file.getAbsolutePath(), subpath);
+            Files.createFile(p);
+        }
+        return file;
+    }
+
     @Test
-    void test9 () throws IOException, BadQuotesException, InterruptedException {
+    void testNoArguments() throws IOException, BadQuotesException, InterruptedException {
+        File tmp = createDirectoryWithFiles(new ArrayList<String>(Arrays.asList("foo.txt", "bar", "foobar")));
+        Environment.setCurrentDirectory(tmp.getAbsolutePath());
 
         runManeger("ls ");
         t = m.getPrintThread();
         t.join(mills);
-        assertEquals("build.gradle\n" +
-                "file.txt\n" +
-                "gradle\n" +
-                "gradlew\n" +
-                "gradlew.bat\n" +
-                "out\n" +
-                "readme.txt\n" +
-                "settings.gradle\n" +
-                "src\n" +
-                "test.txt\n" +
-                "test2.txt\n" +
-                "test_dir\n", outContent.toString());
 
-        runManeger("ls src" );
+        assertEquals("bar\nfoo.txt\nfoobar\n", outContent.toString());
         outContent.reset();
-        t = m.getPrintThread();
-        t.join(mills);
-        assertEquals("main\n" +
-                "test\n", outContent.toString());
 
-        String  absolutePath = System.getProperty("user.dir") + "/src";
-        runManeger("ls " + absolutePath);
-        outContent.reset();
-        t = m.getPrintThread();
-        t.join(mills);
-        assertEquals("main\n" +
-                "test\n", outContent.toString());
+        tmp.delete();
     }
 
+    @Test
+    void testAbsolutePath() throws IOException, BadQuotesException, InterruptedException {
+        File tmp = createDirectoryWithFiles(new ArrayList<String>(Arrays.asList("foo.txt", "bar", "foobar")));
+        Environment.setCurrentDirectory(System.getProperty("user.home"));
+
+        runManeger("ls " + tmp.getAbsolutePath());
+        t = m.getPrintThread();
+        t.join(mills);
+
+        assertEquals("bar\nfoo.txt\nfoobar\n", outContent.toString());
+        outContent.reset();
+
+        tmp.delete();
+    }
+
+    @Test
+    void testRelativePath() throws IOException, BadQuotesException, InterruptedException {
+        File tmp = createDirectoryWithFiles(new ArrayList<String>(Arrays.asList("foo.txt", "bar", "foobar")));
+        Environment.setCurrentDirectory(tmp.getParent());
+
+        runManeger("ls " + tmp.getName());
+        t = m.getPrintThread();
+        t.join(mills);
+
+        assertEquals("bar\nfoo.txt\nfoobar\n", outContent.toString());
+        outContent.reset();
+
+        tmp.delete();
+    }
 }

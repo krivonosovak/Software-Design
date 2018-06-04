@@ -6,14 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-
+/**
+ * Класс-обёртка команды ls. Допускает только один параметр.
+ */
 public class Ls extends CommandInterface {
 
     public Ls(ArrayList<String> file) {
@@ -27,8 +27,14 @@ public class Ls extends CommandInterface {
     @Override
     public void eval(PipedOutputStream output, PipedInputStream input, PipedOutputStream errOutput) {
         try {
+            if (args != null && args.size() > 1) {
+                output.close();
+                errOutput.write(("ls: too many arguments\n").getBytes());
+                errOutput.flush();
+                return;
+            }
             Path resultDirectory = Paths.get(Environment.getCurrentDirectory());
-            if (this.args != null) {
+            if (args != null) {
                 Path currentDirectory = Paths.get(args.get(0));
                 resultDirectory = resultDirectory.resolve(currentDirectory);
                 if (currentDirectory.isAbsolute()) {
@@ -51,17 +57,14 @@ public class Ls extends CommandInterface {
                     output.flush();
                 }
             } else if (file.isFile() && file.exists()) {
-                output.write(file.getName().getBytes());
+                output.write((file.getName() + "\n").getBytes());
                 output.flush();
             } else {
-                throw new IOException();
+                output.close();
+                errOutput.write(("ls: " + file.getName() + ": No such file or directory\n").getBytes());
+                errOutput.flush();
             }
         } catch (IOException e) {
-            try {
-                errOutput.write(("ls: " + e.getMessage() + ": No such file or directory\n").getBytes());
-                errOutput.flush();
-            } catch (IOException e1) {
-            }
         }
     }
 }
